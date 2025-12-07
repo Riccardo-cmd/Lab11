@@ -5,6 +5,7 @@ from database.dao import DAO
 class Model:
     def __init__(self):
         self.G = nx.Graph()
+        self._dao = DAO()
 
     def build_graph(self, year: int):
         """
@@ -14,6 +15,16 @@ class Model:
         :param year: anno limite fino al quale selezionare le connessioni da includere.
         """
         # TODO
+        self.G.clear()
+        rifugi = self._dao.getAllRifugi(year)
+
+        for rifugio in rifugi:
+            u = rifugio["id"]
+            peso = rifugio["valore"]
+            n_sped = rifugio["numero_spedizioni"]
+            self.G.add_edge(u, v, weight=peso, count=n_sped)
+
+
 
     def get_nodes(self):
         """
