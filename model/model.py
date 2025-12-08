@@ -5,7 +5,8 @@ from database.dao import DAO
 class Model:
     def __init__(self):
         self.G = nx.Graph()
-        self._dao = DAO()
+        self._rifugi = DAO.getAllRifugi()
+        self._idMap = {r.id: r for r in self._rifugi}
 
     def build_graph(self, year: int):
         """
@@ -16,13 +17,13 @@ class Model:
         """
         # TODO
         self.G.clear()
-        rifugi = self._dao.getAllRifugi(year)
+        connessioni = DAO.getAllConnessioni(year)
 
-        for rifugio in rifugi:
-            u = rifugio["id"]
-            peso = rifugio["valore"]
-            n_sped = rifugio["numero_spedizioni"]
-            self.G.add_edge(u, v, weight=peso, count=n_sped)
+        for c in connessioni:
+            if c.id_rifugio1 in self._idMap and c.id_rifugio2 in self._idMap:
+                node_u = self._idMap[c.id_rifugio1]
+                node_v = self._idMap[c.id_rifugio2]
+                self.G.add_edge(node_u, node_v)
 
 
 
@@ -32,6 +33,7 @@ class Model:
         :return: lista dei rifugi presenti nel grafo.
         """
         # TODO
+        return list(self.G.nodes())
 
     def get_num_neighbors(self, node):
         """
@@ -40,13 +42,14 @@ class Model:
         :return: numero di vicini diretti del nodo indicato
         """
         # TODO
-
+        return self.G.degree(node)
     def get_num_connected_components(self):
         """
         Restituisce il numero di componenti connesse del grafo.
         :return: numero di componenti connesse
         """
         # TODO
+        return nx.number_connected_components(self.G)
 
     def get_reachable(self, start):
         """
@@ -66,3 +69,7 @@ class Model:
         """
 
         # TODO
+        if start not in self.G:
+            return []
+        reachable_set = nx.node_connected_component(self.G, start)
+        return list(reachable_set)
